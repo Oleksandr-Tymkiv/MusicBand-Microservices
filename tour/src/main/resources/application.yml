@@ -1,0 +1,39 @@
+#spring.application.name=tour
+
+spring:
+  application:
+    name: "tour"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  datasource:
+    url: jdbc:postgresql://localhost:5433/tourdb
+    username: postgres
+    password: root
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    shutdown:
+      access: unrestricted
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
