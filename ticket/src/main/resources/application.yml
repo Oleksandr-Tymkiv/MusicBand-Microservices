@@ -1,12 +1,10 @@
-#spring.application.name=tour
-
 spring:
   application:
-    name: "tour"
+    name: "ticket"
   config:
     import: "optional:configserver:http://localhost:8071/"
   datasource:
-    url: jdbc:postgresql://localhost:5433/tourdb
+    url: jdbc:postgresql://localhost:5434/ticketdb
     username: postgres
     password: root
   sql:
@@ -16,9 +14,5 @@ spring:
     show-sql: true
 
 server:
-  port: 8080
-logging:
-  level:
-    com:
-      musicband:
-        tour: DEBUG
+  port: 8090
+

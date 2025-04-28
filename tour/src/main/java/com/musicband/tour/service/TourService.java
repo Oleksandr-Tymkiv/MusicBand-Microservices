@@ -1,7 +1,6 @@
 package com.musicband.tour.service;
 
 import com.musicband.tour.dto.TourDto;
-import com.musicband.tour.entity.Tour;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ public interface TourService {
 
     void updateTour(TourDto tourDto);
 
-    boolean removeTour(String title);
+    void removeTour(String title);
 
     List<TourDto> getTours();
 

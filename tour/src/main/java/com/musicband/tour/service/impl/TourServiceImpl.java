@@ -40,12 +40,11 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public boolean removeTour(String tourTitle) {
+    public void removeTour(String tourTitle) {
         Tour fetchedTour = tourRepository.findByTitle(tourTitle).orElseThrow(
                 () -> new IllegalStateException("Tour not found")
         );
         tourRepository.delete(fetchedTour);
-        return true;
     }
 
     @Override
