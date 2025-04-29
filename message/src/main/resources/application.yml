@@ -1,0 +1,23 @@
+#spring.application.name=message
+
+server:
+  port: 9010
+
+spring:
+  application:
+    name: "message"
+  cloud:
+    function:
+      definition: tourCreated
+    stream:
+      bindings:
+        tourCreated-in-0:
+          destination: tour-created-events
+          group: "tour-group"
+        tourCreated-out-0:
+          destination: tour-sent-events
+          group: "ticket-group"
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092

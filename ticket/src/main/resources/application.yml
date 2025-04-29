@@ -12,7 +12,23 @@ spring:
       mode: always
   jpa:
     show-sql: true
+  cloud:
+    function:
+      definition: createdTicketsForTour
+    stream:
+      bindings:
+        createdTicketsForTour-in-0:
+          destination: tour-sent-events
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092
 
 server:
   port: 8090
+logging:
+  level:
+    com:
+      musicband:
+        ticket: DEBUG
 

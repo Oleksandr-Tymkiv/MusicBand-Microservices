@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: "notification"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  cloud:
+#    function:
+#      definition: createdTicketsForTour
+#    stream:
+#      bindings:
+#        createdTicketsForTour-in-0:
+#          destination: tour-sent-events
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "${email_smtp}"
+    password: "${smtp_password}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8073
+logging:
+  level:
+    com:
+      musicband:
+        notification: DEBUG

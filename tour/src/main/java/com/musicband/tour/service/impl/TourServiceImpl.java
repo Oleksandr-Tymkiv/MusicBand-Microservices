@@ -1,6 +1,7 @@
 package com.musicband.tour.service.impl;
 
 import com.musicband.tour.dto.TourDto;
+import com.musicband.tour.dto.TourMsgDto;
 import com.musicband.tour.entity.Tour;
 import com.musicband.tour.mappers.TourMapper;
 import com.musicband.tour.repository.TourRepository;
@@ -8,6 +9,7 @@ import com.musicband.tour.service.TourService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +20,8 @@ public class TourServiceImpl implements TourService {
 
     private final TourRepository tourRepository;
     private static final Logger log = LoggerFactory.getLogger(TourServiceImpl.class);
+    private final StreamBridge streamBridge;
+
 
     @Override
     public void addTour(TourDto tourDto) {
@@ -26,7 +30,21 @@ public class TourServiceImpl implements TourService {
         }
 
         Tour savedTour = tourRepository.save(TourMapper.tourDtoToTour(tourDto, new Tour()));
+        tourCreatedEvents(savedTour);
         log.info("Tour added successfully : {}", savedTour);
+    }
+
+    private void tourCreatedEvents(Tour tour){
+        TourMsgDto tourMsgDto = new TourMsgDto(
+                tour.getTourId(),
+                tour.getTitle(),
+                tour.getTourDate(),
+                tour.getCountry(),
+                tour.getArea()
+        );
+        log.info("Tour created events: {}",tourMsgDto);
+        boolean result = streamBridge.send("tourCreatedEvents-out-0", tourMsgDto);
+        log.info("Result : {}",result);
     }
 
     @Override
