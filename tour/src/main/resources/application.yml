@@ -19,6 +19,10 @@ spring:
       bindings:
         tourCreatedEvents-out-0:
           destination: tour-created-events
+        tourUpdatedEvents-out-0:
+          destination: tour-updated-events
+        tourDeletedEvents-out-0:
+          destination: tour-deleted-events
       kafka:
         binder:
           brokers:

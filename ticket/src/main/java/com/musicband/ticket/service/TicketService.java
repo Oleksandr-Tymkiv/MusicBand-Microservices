@@ -15,4 +15,6 @@ public interface TicketService {
     List<TicketDto> getTickets();
 
     boolean returnTicket(TicketDto ticketDto);
+
+    void removeTicketsOfTour(Long tourId);
 }

@@ -21,4 +21,20 @@ public class MessageTourFunctions {
         };
     }
 
+    @Bean
+    public Function<TourMsgDto,TourMsgDto> tourUpdated(){
+        return tourMsgDto -> {
+            log.info("Tour updated : {}", tourMsgDto);
+            return tourMsgDto;
+        };
+    }
+
+    @Bean
+    public Function<TourMsgDto,TourMsgDto> tourDeleted(){
+        return tourMsgDto -> {
+            log.info("Tour deleted : {}", tourMsgDto);
+            return tourMsgDto;
+        };
+    }
+
 }

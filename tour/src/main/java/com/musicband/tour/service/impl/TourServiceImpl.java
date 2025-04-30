@@ -44,7 +44,7 @@ public class TourServiceImpl implements TourService {
         );
         log.info("Tour created events: {}",tourMsgDto);
         boolean result = streamBridge.send("tourCreatedEvents-out-0", tourMsgDto);
-        log.info("Result : {}",result);
+        log.info("Result of creating : {}",result);
     }
 
     @Override
@@ -54,7 +54,21 @@ public class TourServiceImpl implements TourService {
         );
 
         Tour savedTour = tourRepository.save(TourMapper.tourDtoToTour(tourDto, fetchedTour));
+        tourUpdatedEvents(savedTour);
         log.info("Tour updated successfully : {}", savedTour);
+    }
+
+    private void tourUpdatedEvents(Tour tour){
+        TourMsgDto tourMsgDto = new TourMsgDto(
+                tour.getTourId(),
+                tour.getTitle(),
+                tour.getTourDate(),
+                tour.getCountry(),
+                tour.getArea()
+        );
+        log.info("Tour updated events: {}",tourMsgDto);
+        boolean result = streamBridge.send("tourUpdatedEvents-out-0", tourMsgDto);
+        log.info("Result of updating: {}",result);
     }
 
     @Override
@@ -62,7 +76,21 @@ public class TourServiceImpl implements TourService {
         Tour fetchedTour = tourRepository.findByTitle(tourTitle).orElseThrow(
                 () -> new IllegalStateException("Tour not found")
         );
+        tourDeletedEvents(fetchedTour);
         tourRepository.delete(fetchedTour);
+    }
+
+    private void tourDeletedEvents(Tour tour){
+        TourMsgDto tourMsgDto = new TourMsgDto(
+                tour.getTourId(),
+                tour.getTitle(),
+                tour.getTourDate(),
+                tour.getCountry(),
+                tour.getArea()
+        );
+        log.info("Tour deleted events: {}",tourMsgDto);
+        boolean result = streamBridge.send("tourDeletedEvents-out-0", tourMsgDto);
+        log.info("Result of deleting: {}",result);
     }
 
     @Override

@@ -8,15 +8,33 @@ spring:
     name: "message"
   cloud:
     function:
-      definition: tourCreated
+      definition: tourCreated;tourUpdated;tourDeleted;newTicketsForTour
     stream:
       bindings:
         tourCreated-in-0:
           destination: tour-created-events
-          group: "tour-group"
+          group: "tour-created-group"
         tourCreated-out-0:
           destination: tour-sent-events
-          group: "ticket-group"
+          group: "ticket-created-group"
+        tourUpdated-in-0:
+          destination: tour-updated-events
+          group: "tour-updated-group"
+        tourUpdated-out-0:
+          destination: notification-tour-updated-events
+          group: "notification-tour-updated-group"
+        tourDeleted-in-0:
+          destination: tour-deleted-events
+          group: "tour-deleted-group"
+        tourDeleted-out-0:
+          destination: notification-tour-deleted-events
+          group: "notification-tour-deleted-group"
+        newTicketsForTour-in-0:
+          destination: new-tickets-events
+          group: "new-tickets-group"
+        newTicketsForTour-out-0:
+          destination: notification-new-tickets-events
+          group: "notification-new-tickets-group"
       kafka:
         binder:
           brokers:

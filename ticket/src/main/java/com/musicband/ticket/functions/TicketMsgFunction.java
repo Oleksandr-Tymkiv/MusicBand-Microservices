@@ -1,5 +1,6 @@
 package com.musicband.ticket.functions;
 
+import com.musicband.ticket.dto.TicketMsgDto;
 import com.musicband.ticket.service.TicketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Configuration
 public class TicketMsgFunction {
@@ -18,6 +20,14 @@ public class TicketMsgFunction {
         return tour -> {
           log.info("tour sent : {}", tour);
           ticketService.addTicketsForTour(tour);
+        };
+    }
+
+    @Bean
+    public Consumer<TicketMsgDto> deletedTicketsOfTour(TicketService ticketService) {
+        return tour -> {
+            log.info("tour deleted : {}", tour);
+            ticketService.removeTicketsOfTour(tour.tourId());
         };
     }
 }
