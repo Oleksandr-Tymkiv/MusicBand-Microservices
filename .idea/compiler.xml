@@ -41,6 +41,15 @@
         </processorPath>
         <module name="notification" />
       </profile>
+      <profile name="Annotation profile for payment" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="payment" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -50,6 +59,7 @@
       <module name="gatewayserver" options="-parameters" />
       <module name="message" options="-parameters" />
       <module name="notification" options="-parameters" />
+      <module name="payment" options="-parameters" />
       <module name="ticket" options="-parameters" />
       <module name="tour" options="-parameters" />
     </option>

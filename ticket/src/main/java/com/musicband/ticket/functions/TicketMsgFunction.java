@@ -1,5 +1,6 @@
 package com.musicband.ticket.functions;
 
+import com.musicband.ticket.dto.OrderStatusMsgDto;
 import com.musicband.ticket.dto.TicketMsgDto;
 import com.musicband.ticket.service.TicketService;
 import org.slf4j.Logger;
@@ -28,6 +29,14 @@ public class TicketMsgFunction {
         return tour -> {
             log.info("tour deleted : {}", tour);
             ticketService.removeTicketsOfTour(tour.tourId());
+        };
+    }
+
+    @Bean
+    public Consumer<OrderStatusMsgDto> changeOrderStatus(TicketService ticketService) {
+        return status -> {
+            log.info("new status : {}", status);
+            ticketService.changeStatus(status);
         };
     }
 }

@@ -1,6 +1,7 @@
 package com.musicband.ticket.controllers;
 
 import com.musicband.ticket.dto.TicketDto;
+import com.musicband.ticket.dto.TicketOrderDto;
 import com.musicband.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,33 +25,19 @@ public class TickerController {
                 .body(ticketService.getTickets());
     }
 
-    @PatchMapping("purchase-ticket")
-    public ResponseEntity<String> purchaseTicket(@RequestBody TicketDto ticketDto) {
-        return ticketService.purchaseTicket(ticketDto)
-                ? ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Successfully purchased ticket")
-                : ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Cannot purchase ticket");
-    }
-
-    @PatchMapping("return-ticket")
-    public ResponseEntity<String> returnTicket(@RequestBody TicketDto ticketDto) {
-        return ticketService.returnTicket(ticketDto)
-                ? ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Successfully returned ticket")
-                : ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body("Cannot returned ticket");
-    }
-
     @PostMapping("add-ticket")
     public ResponseEntity<String> addTicket(@RequestBody TicketDto ticketDto) {
         ticketService.addTicket(ticketDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Successfully added ticket");
+    }
+
+    @PostMapping("order-ticket")
+    public ResponseEntity<String> orderTicket(@RequestBody TicketOrderDto ticketOrderDto) {
+        ticketService.orderTicket(ticketOrderDto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Order created successfully");
     }
 }

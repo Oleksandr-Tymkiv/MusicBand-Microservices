@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 public class TicketDto {
     private Double price;
     private String place;
-    private Boolean isPurchase;
     private Long tourId;
 }

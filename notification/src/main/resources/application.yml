@@ -11,15 +11,21 @@ spring:
       timeout: 1s
   cloud:
     function:
-      definition: tourUpdatedMessage;tourDeletedMessage;ticketUpdatedMessage
+      definition: tourUpdatedMessage;tourDeletedMessage;ticketUpdatedMessage;orderStatusMessage
     stream:
       bindings:
         tourUpdatedMessage-in-0:
           destination: notification-tour-updated-events
+          group: "notification-tour-updated-events-notification"
         tourDeletedMessage-in-0:
           destination: notification-tour-deleted-events
+          group: "notification-tour-deleted-events-notification"
         ticketUpdatedMessage-in-0:
           destination: notification-new-tickets-events
+          group: "notification-new-tickets-events-notification"
+        orderStatusMessage-in-0:
+          destination: notification-order-status-payment
+          group: "notification-order-status-payment-notification"
       kafka:
         binder:
           brokers:

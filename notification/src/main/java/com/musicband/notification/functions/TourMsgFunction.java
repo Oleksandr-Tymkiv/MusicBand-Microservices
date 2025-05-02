@@ -1,6 +1,8 @@
 package com.musicband.notification.functions;
 
+import com.musicband.notification.dto.OrderStatusMsgDto;
 import com.musicband.notification.dto.TourMsgDto;
+import com.musicband.notification.service.OrderEmailService;
 import com.musicband.notification.service.TourEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,14 @@ public class TourMsgFunction {
         return ticketUpdated -> {
             log.info("Updated ticket sent : {}", ticketUpdated);
             tourEmailService.ticketUpdatedMessage(ticketUpdated);
+        };
+    }
+
+    @Bean
+    public Consumer<OrderStatusMsgDto> orderStatusMessage(OrderEmailService orderEmailService) {
+        return orderStatusMsg -> {
+            log.info("Order status sent : {}", orderStatusMsg);
+            orderEmailService.sendStatusOrderEmail(orderStatusMsg);
         };
     }
 }

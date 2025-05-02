@@ -14,15 +14,24 @@ spring:
     show-sql: true
   cloud:
     function:
-      definition: createdTicketsForTour;deletedTicketsOfTour
+      definition: createdTicketsForTour;deletedTicketsOfTour;changeOrderStatus
     stream:
       bindings:
         createdTicketsForTour-in-0:
           destination: tour-sent-events
+          group: "tour-sent-events-ticket"
         newTicketsEvents-out-0:
           destination: new-tickets-events
+          group: "new-tickets-events-ticket"
         deletedTicketsOfTour-in-0:
           destination: notification-tour-deleted-events
+          group: "notification-tour-deleted-events-ticket"
+        orderTicketEvents-out-0:
+          destination: order-ticket-events
+          group: "order-ticket-events-ticket"
+        changeOrderStatus-in-0:
+          destination: notification-order-status-payment
+          group: "notification-order-status-payment-ticket"
       kafka:
         binder:
           brokers:

@@ -8,33 +8,45 @@ spring:
     name: "message"
   cloud:
     function:
-      definition: tourCreated;tourUpdated;tourDeleted;newTicketsForTour
+      definition: tourCreated;tourUpdated;tourDeleted;newTicketsForTour;orderTicket;orderStatusCheck
     stream:
       bindings:
         tourCreated-in-0:
           destination: tour-created-events
-          group: "tour-created-group"
+          group: "tour-created-group-message"
         tourCreated-out-0:
           destination: tour-sent-events
-          group: "ticket-created-group"
+          group: "ticket-created-group-message"
         tourUpdated-in-0:
           destination: tour-updated-events
-          group: "tour-updated-group"
+          group: "tour-updated-group-message"
         tourUpdated-out-0:
           destination: notification-tour-updated-events
-          group: "notification-tour-updated-group"
+          group: "notification-tour-updated-group-message"
         tourDeleted-in-0:
           destination: tour-deleted-events
-          group: "tour-deleted-group"
+          group: "tour-deleted-group-message"
         tourDeleted-out-0:
           destination: notification-tour-deleted-events
-          group: "notification-tour-deleted-group"
+          group: "notification-tour-deleted-group-message"
         newTicketsForTour-in-0:
           destination: new-tickets-events
-          group: "new-tickets-group"
+          group: "new-tickets-group-message"
         newTicketsForTour-out-0:
           destination: notification-new-tickets-events
-          group: "notification-new-tickets-group"
+          group: "notification-new-tickets-group-message"
+        orderTicket-in-0:
+          destination: order-ticket-events
+          group: "order-ticket-group-message"
+        orderTicket-out-0:
+          destination: payment-order-ticket-events
+          group: "payment-order-ticket-group-message"
+        orderStatusCheck-in-0:
+          destination: order-status-payment
+          group: "order-status-payment-group-message"
+        orderStatusCheck-out-0:
+          destination: notification-order-status-payment
+          group: "notification-order-status-payment-group-message"
       kafka:
         binder:
           brokers:

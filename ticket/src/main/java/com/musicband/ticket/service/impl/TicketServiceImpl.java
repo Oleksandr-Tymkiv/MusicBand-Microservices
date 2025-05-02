@@ -1,11 +1,14 @@
 package com.musicband.ticket.service.impl;
 
-import com.musicband.ticket.dto.TicketDto;
-import com.musicband.ticket.dto.TicketMsgDto;
+import com.musicband.ticket.dto.*;
 import com.musicband.ticket.entity.Ticket;
+import com.musicband.ticket.entity.TicketOrder;
 import com.musicband.ticket.mapper.TicketMapper;
+import com.musicband.ticket.mapper.TicketOrderMapper;
+import com.musicband.ticket.repository.TicketOrderRepository;
 import com.musicband.ticket.repository.TicketRepository;
 import com.musicband.ticket.service.TicketService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ public class TicketServiceImpl implements TicketService {
     private static final Logger log = LoggerFactory.getLogger(TicketServiceImpl.class);
     private static final int DEFAULT_TICKET_COUNT = 10;
     private final TicketRepository ticketRepository;
+    private final TicketOrderRepository ticketOrderRepository;
     private final StreamBridge streamBridge;
 
     @Override
@@ -38,11 +42,10 @@ public class TicketServiceImpl implements TicketService {
         TicketMsgDto ticketMsgDto = new TicketMsgDto(
                 ticket.getPrice(),
                 ticket.getPlace(),
-                ticket.getIsPurchase(),
                 ticket.getTourId()
         );
         log.info("New Ticket events: {}",ticketMsgDto);
-        boolean result = streamBridge.send("newTicketsEvents-out-0", ticketMsgDto);
+        boolean result = streamBridge.send("orderStatusPayment-out-0", ticketMsgDto);
         log.info("Result of adding: {}",result);
     }
 
@@ -52,7 +55,6 @@ public class TicketServiceImpl implements TicketService {
                         .mapToObj(i -> TicketDto.builder()
                                 .price(99.99)
                                 .place("A"+i)
-                                .isPurchase(false)
                                 .tourId(tourId)
                                 .build()
                         ).toList();
@@ -61,36 +63,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public boolean purchaseTicket(TicketDto ticketDto) {
-        boolean isTickedPurchase = false;
-        Ticket ticket = ticketRepository.findTicketByPlaceAndTourId(ticketDto.getPlace(), ticketDto.getTourId()).orElseThrow(
-                ()-> new IllegalStateException("Ticket with place"+ ticketDto.getPlace() +" not found")
-        );
-        if(!ticket.getIsPurchase()){
-            ticket.setIsPurchase(true);
-            isTickedPurchase = true;
-            ticketRepository.save(ticket);
-        }
-        return isTickedPurchase;
-    }
-
-    @Override
     public List<TicketDto> getTickets() {
-        return ticketRepository.findAllByIsPurchaseIsFalse().stream().map(ticket -> TicketMapper.ticketToTicketDto(ticket, new TicketDto())).toList();
-    }
-
-    @Override
-    public boolean returnTicket(TicketDto ticketDto) {
-        boolean isTicketReturned = false;
-        Ticket ticket = ticketRepository.findTicketByPlaceAndTourId(ticketDto.getPlace(), ticketDto.getTourId()).orElseThrow(
-                ()-> new IllegalStateException("Ticket with place"+ ticketDto.getPlace() +" not found")
-        );
-        if(ticket.getIsPurchase()){
-            ticket.setIsPurchase(false);
-            isTicketReturned = true;
-            ticketRepository.save(ticket);
-        }
-        return isTicketReturned;
+        return ticketRepository.findAll().stream().map(ticket -> TicketMapper.ticketToTicketDto(ticket, new TicketDto())).toList();
     }
 
     @Override
@@ -98,4 +72,38 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.deleteTicketsByTourId(tourId);
     }
 
+    @Override
+    public void orderTicket(TicketOrderDto ticketOrderDto) {
+        TicketOrder ticketOrder = ticketOrderRepository.save(TicketOrderMapper.ticketOrderDtoToTicketOrder(ticketOrderDto, new TicketOrder()));
+        orderTickerEvents(ticketOrder);
+        log.info("Saved ticket order : {}",ticketOrder);
+    }
+
+    private void orderTickerEvents(TicketOrder ticketOrder) {
+        Double tickerPrice = ticketRepository.findById(ticketOrder.getTicketId()).map(Ticket::getPrice).orElseThrow(
+                ()-> new IllegalStateException("Ticket whit id "+ticketOrder.getTicketId()+" does not exist")
+        );
+        TicketOrderMsgDto ticketOrderMsgDto = new TicketOrderMsgDto(
+                ticketOrder.getOrderId(),
+                tickerPrice,
+                ticketOrder.getUserEmail()
+        );
+        log.info("Order Ticket events: {}",ticketOrderMsgDto);
+        boolean result = streamBridge.send("orderTicketEvents-out-0", ticketOrderMsgDto);
+        log.info("Result of order ticket: {}",result);
+    }
+
+    @Override
+    @Transactional
+    public void changeStatus(OrderStatusMsgDto orderStatusMsgDto) {
+        ticketOrderRepository.findByOrderId(orderStatusMsgDto.orderId()).map(
+                ticketOrder->{
+                    ticketOrder.setStatus(orderStatusMsgDto.status());
+                    log.info("Ticket order status changed : {}",ticketOrder);
+                    return ticketOrderRepository.save(ticketOrder);
+                }
+        ).orElseThrow(
+                ()-> new IllegalStateException("Ticket order status changed does not exist")
+        );
+    }
 }
