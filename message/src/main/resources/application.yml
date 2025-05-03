@@ -8,7 +8,7 @@ spring:
     name: "message"
   cloud:
     function:
-      definition: tourCreated;tourUpdated;tourDeleted;newTicketsForTour;orderTicket;orderStatusCheck
+      definition: tourCreated;tourUpdated;tourDeleted;newTicketsForTour;orderTicket;orderTicketStatusCheck;orderMerch;orderMerchStatusCheck
     stream:
       bindings:
         tourCreated-in-0:
@@ -41,12 +41,24 @@ spring:
         orderTicket-out-0:
           destination: payment-order-ticket-events
           group: "payment-order-ticket-group-message"
-        orderStatusCheck-in-0:
-          destination: order-status-payment
-          group: "order-status-payment-group-message"
-        orderStatusCheck-out-0:
-          destination: notification-order-status-payment
-          group: "notification-order-status-payment-group-message"
+        orderMerch-in-0:
+          destination: order-merch-events
+          group: "order-merch-group-message"
+        orderMerch-out-0:
+          destination: payment-order-merch-events
+          group: "payment-order-merch-group-message"
+        orderTicketStatusCheck-in-0:
+          destination: order-status-ticket-payment
+          group: "order-status-payment-ticket-group-message"
+        orderTicketStatusCheck-out-0:
+          destination: notification-ticket-order-status-payment
+          group: "notification-order-status-payment-merch-group-message"
+        orderMerchStatusCheck-in-0:
+          destination: order-status-merch-payment
+          group: "order-status-payment-merch-group-message"
+        orderMerchStatusCheck-out-0:
+          destination: notification-merch-order-status-payment
+          group: "notification-order-status-payment-merch-group-message"
       kafka:
         binder:
           brokers:

@@ -68,6 +68,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public List<TicketDto> getAvailableTickets(){
+        return ticketRepository.findAllByIsAvailableIsTrue().stream().map(ticket -> TicketMapper.ticketToTicketDto(ticket, new TicketDto())).toList();
+    }
+
+    @Override
     public void removeTicketsOfTour(Long tourId) {
         ticketRepository.deleteTicketsByTourId(tourId);
     }
@@ -96,14 +101,24 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public void changeStatus(OrderStatusMsgDto orderStatusMsgDto) {
-        ticketOrderRepository.findByOrderId(orderStatusMsgDto.orderId()).map(
-                ticketOrder->{
-                    ticketOrder.setStatus(orderStatusMsgDto.status());
-                    log.info("Ticket order status changed : {}",ticketOrder);
-                    return ticketOrderRepository.save(ticketOrder);
+        TicketOrder ticketOrder = ticketOrderRepository.findByOrderId(orderStatusMsgDto.orderId()).map(
+                order->{
+                    order.setStatus(orderStatusMsgDto.status());
+                    log.info("Ticket order status changed : {}",order);
+                    return ticketOrderRepository.save(order);
                 }
         ).orElseThrow(
                 ()-> new IllegalStateException("Ticket order status changed does not exist")
         );
+        ticketRepository.findById(ticketOrder.getTicketId()).map(
+                ticket ->{
+                    ticket.setIsAvailable(false);
+                    log.info("Ticket is unavailable now : {}",ticket);
+                    return ticketRepository.save(ticket);
+                }
+        ).orElseThrow(
+                ()-> new IllegalStateException("Ticket does not exist")
+        );
     }
+
 }

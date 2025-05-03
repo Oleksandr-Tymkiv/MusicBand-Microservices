@@ -30,7 +30,7 @@ spring:
           destination: order-ticket-events
           group: "order-ticket-events-ticket"
         changeOrderStatus-in-0:
-          destination: notification-order-status-payment
+          destination: notification-ticket-order-status-payment
           group: "notification-order-status-payment-ticket"
       kafka:
         binder:

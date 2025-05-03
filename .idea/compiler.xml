@@ -50,6 +50,15 @@
         </processorPath>
         <module name="payment" />
       </profile>
+      <profile name="Annotation profile for merch" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath>
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+        </processorPath>
+        <module name="merch" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -57,6 +66,7 @@
       <module name="configserver" options="-parameters" />
       <module name="eurekaserver" options="-parameters" />
       <module name="gatewayserver" options="-parameters" />
+      <module name="merch" options="-parameters" />
       <module name="message" options="-parameters" />
       <module name="notification" options="-parameters" />
       <module name="payment" options="-parameters" />

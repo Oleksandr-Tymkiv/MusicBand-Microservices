@@ -41,10 +41,18 @@ public class TourMsgFunction {
     }
 
     @Bean
-    public Consumer<OrderStatusMsgDto> orderStatusMessage(OrderEmailService orderEmailService) {
-        return orderStatusMsg -> {
-            log.info("Order status sent : {}", orderStatusMsg);
-            orderEmailService.sendStatusOrderEmail(orderStatusMsg);
+    public Consumer<OrderStatusMsgDto> orderTicketStatusMessage(OrderEmailService orderEmailService) {
+        return orderTicketStatusMsg -> {
+            log.info("Order ticket status sent : {}", orderTicketStatusMsg);
+            orderEmailService.sendStatusOrderEmail(orderTicketStatusMsg);
+        };
+    }
+
+    @Bean
+    public Consumer<OrderStatusMsgDto> orderMerchStatusMessage(OrderEmailService orderEmailService) {
+        return orderMerchStatusMsg -> {
+            log.info("Order merch status sent : {}", orderMerchStatusMsg);
+            orderEmailService.sendStatusOrderEmail(orderMerchStatusMsg);
         };
     }
 }

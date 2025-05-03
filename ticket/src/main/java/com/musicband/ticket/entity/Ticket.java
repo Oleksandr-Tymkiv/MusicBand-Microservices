@@ -28,6 +28,8 @@ public class Ticket extends BaseEntity {
     private Double price;
     @Column(name = "place")
     private String place;
+    @Column(name = "is_available")
+    private Boolean isAvailable;
     @Column(name = "tour_id")
     private Long tourId;
 

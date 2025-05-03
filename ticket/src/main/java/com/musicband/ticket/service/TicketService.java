@@ -14,6 +14,8 @@ public interface TicketService {
 
     List<TicketDto> getTickets();
 
+    List<TicketDto> getAvailableTickets();
+
     void removeTicketsOfTour(Long tourId);
 
     void orderTicket(TicketOrderDto ticketOrderDto);

@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: "ticket"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  datasource:
+    url: jdbc:postgresql://localhost:5436/merchdb
+    username: postgres
+    password: root
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+  cloud:
+    function:
+      definition: changeOrderStatus
+    stream:
+      bindings:
+        orderMerchEvents-out-0:
+          destination: order-merch-events
+          group: "order-ticket-events-merch"
+        changeOrderStatus-in-0:
+          destination: notification-merch-order-status-payment
+          group: "notification-order-status-payment-merch"
+      kafka:
+        binder:
+          brokers:
+            - localhost:9092
+
+server:
+  port: 9020
+logging:
+  level:
+    com:
+      musicband:
+        merch: DEBUG
+

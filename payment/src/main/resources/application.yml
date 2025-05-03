@@ -14,15 +14,21 @@ spring:
     show-sql: true
   cloud:
     function:
-      definition: orderTicketPayment
+      definition: orderTicketPayment;orderMerchPayment
     stream:
       bindings:
         orderTicketPayment-in-0:
           destination: payment-order-ticket-events
           group: "payment-order-ticket-events-payment"
-        orderStatusPayment-out-0:
-          destination: order-status-payment
-          group: "order-status-payment-payment"
+        orderTicketStatusPayment-out-0:
+          destination: order-status-ticket-payment
+          group: "order-status-ticket-payment-payment"
+        orderMerchPayment-in-0:
+          destination: payment-order-merch-events
+          group: "payment-order-merch-events-payment"
+        orderMerchStatusPayment-out-0:
+          destination: order-status-merch-payment
+          group: "order-status-merch-payment-payment"
       kafka:
         binder:
           brokers:

@@ -30,6 +30,9 @@ public class Payment extends BaseEntity {
     private UUID orderId;
     @Column(name = "price")
     private Double price;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_type")
+    private OrderType orderType;
     @Column(name = "status")
     private String status;
     @Column(name = "user_email")

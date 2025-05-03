@@ -18,11 +18,18 @@ public class TickerController {
 
     private final TicketService ticketService;
 
+    @GetMapping("find-all-tickets")
+    public ResponseEntity<List<TicketDto>> findAllTickets() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ticketService.getTickets());
+    }
+
     @GetMapping("find-all-available-tickets")
     public ResponseEntity<List<TicketDto>> findAllAvailableTickets() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ticketService.getTickets());
+                .body(ticketService.getAvailableTickets());
     }
 
     @PostMapping("add-ticket")

@@ -8,6 +8,7 @@ public class TicketMapper {
     public static Ticket ticketDtoToTicket(TicketDto ticketDto, Ticket ticket) {
         ticket.setPrice(ticketDto.getPrice());
         ticket.setPlace(ticketDto.getPlace());
+        ticket.setIsAvailable(true);
         ticket.setTourId(ticketDto.getTourId());
         return ticket;
     }

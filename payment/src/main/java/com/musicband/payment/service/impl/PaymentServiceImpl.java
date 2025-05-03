@@ -1,9 +1,9 @@
 package com.musicband.payment.service.impl;
 
 import com.musicband.payment.dto.OrderDto;
+import com.musicband.payment.dto.OrderMsgDto;
 import com.musicband.payment.dto.OrderStatusMsgDto;
 import com.musicband.payment.dto.PaymentDto;
-import com.musicband.payment.dto.TicketOrderMsgDto;
 import com.musicband.payment.entity.Payment;
 import com.musicband.payment.mappers.PaymentMapper;
 import com.musicband.payment.repository.PaymentRepository;
@@ -28,13 +28,24 @@ public class PaymentServiceImpl implements PaymentService {
     private final StreamBridge streamBridge;
 
     @Override
-    public void orderTicketCreate(TicketOrderMsgDto ticketOrderMsgDto) {
+    public void orderTicketCreate(OrderMsgDto ticketOrderMsgDto) {
         if(paymentRepository.findByOrderId(ticketOrderMsgDto.orderId()).isPresent()) {
-            throw new IllegalStateException("Order already exists");
+            throw new IllegalStateException("Ticket Order already exists");
         }
         Payment savedPayment = PaymentMapper.ticketOrderDtoToPayment(ticketOrderMsgDto, new Payment());
         paymentRepository.save(savedPayment);
-        log.info("Payment saved : {}", savedPayment);
+        log.info("Payment ticket saved : {}", savedPayment);
+    }
+
+
+    @Override
+    public void orderMerchCreate(OrderMsgDto merchOrderMsgDto) {
+        if(paymentRepository.findByOrderId(merchOrderMsgDto.orderId()).isPresent()) {
+            throw new IllegalStateException("Merch Order already exists");
+        }
+        Payment savedPayment = PaymentMapper.merchOrderDtoToPayment(merchOrderMsgDto, new Payment());
+        paymentRepository.save(savedPayment);
+        log.info("Payment merch saved : {}", savedPayment);
     }
 
     @Override
@@ -68,7 +79,13 @@ public class PaymentServiceImpl implements PaymentService {
         );
 
         log.info("Order status events: {}",orderStatusMsgDto);
-        boolean result = streamBridge.send("orderStatusPayment-out-0", orderStatusMsgDto);
+
+        String bindingName = switch (payment.getOrderType()){
+            case TICKET -> "orderTicketStatusPayment-out-0";
+            case MERCH -> "orderMerchStatusPayment-out-0";
+        };
+
+        boolean result = streamBridge.send(bindingName, orderStatusMsgDto);
         log.info("Result of order status: {}",result);
     }
 
