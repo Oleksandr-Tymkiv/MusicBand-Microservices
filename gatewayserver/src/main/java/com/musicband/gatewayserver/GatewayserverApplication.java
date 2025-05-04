@@ -26,8 +26,23 @@ public class GatewayserverApplication {
 	}
 
 	@Bean
-	public RouteLocator eazyBankRouteConfig(RouteLocatorBuilder builder) {
+	public RouteLocator musicBandRouteConfig(RouteLocatorBuilder builder) {
 		return builder.routes()
+				.route(p->p.path("/musicband/tour/**")
+						.filters(f->f.rewritePath("/musicband/tour/?(?<segment>.*)","/${segment}"))
+						.uri("lb://TOUR"))
+				.route(p->p.path("/musicband/ticket/**")
+						.filters(f->f.rewritePath("/musicband/ticket/?(?<segment>.*)","/${segment}"))
+						.uri("lb://TICKET"))
+				.route(p->p.path("/musicband/merch/**")
+						.filters(f->f.rewritePath("/musicband/merch/?(?<segment>.*)","/${segment}"))
+						.uri("lb://MERCH"))
+				.route(p->p.path("/musicband/payment/**")
+						.filters(f->f.rewritePath("/musicband/payment/?(?<segment>.*)","/${segment}"))
+						.uri("lb://PAYMENT"))
+				.route(p->p.path("/musicband/notification/**")
+						.filters(f->f.rewritePath("/musicband/notification/?(?<segment>.*)","/${segment}"))
+						.uri("lb://NOTIFICATION"))
 				.build();
 	}
 }
