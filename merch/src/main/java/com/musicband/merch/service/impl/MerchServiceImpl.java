@@ -6,6 +6,8 @@ import com.musicband.merch.dto.MerchOrderMsgDto;
 import com.musicband.merch.dto.OrderStatusMsgDto;
 import com.musicband.merch.entity.Merch;
 import com.musicband.merch.entity.MerchOrder;
+import com.musicband.merch.exceptions.MerchAlreadyExistsException;
+import com.musicband.merch.exceptions.ResourceNotFoundException;
 import com.musicband.merch.mappers.MerchMapper;
 import com.musicband.merch.mappers.MerchOrderMapper;
 import com.musicband.merch.repository.MerchOrderRepository;
@@ -32,7 +34,7 @@ public class MerchServiceImpl implements MerchService {
     @Override
     public void addMerch(MerchDto merchDto) {
         if(merchRepository.findByTitle(merchDto.getTitle()).isPresent()) {
-            throw new IllegalStateException("Merch already exists");
+            throw new MerchAlreadyExistsException("Merch already exists");
         }
 
         Merch savedMerch = merchRepository.save(MerchMapper.merchDtoToMerch(merchDto,new Merch()));
@@ -40,8 +42,9 @@ public class MerchServiceImpl implements MerchService {
     }
 
     @Override
-    public List<MerchDto> getAllMerch() {
-        return merchRepository.findAll().stream().map(merch -> MerchMapper.merchToMerchDto(merch, new MerchDto())).toList();
+    public List<Merch> getAllMerch() {
+//        return merchRepository.findAll().stream().map(merch -> MerchMapper.merchToMerchDto(merch, new MerchDto())).toList();
+        return merchRepository.findAll();
     }
 
     @Override
@@ -53,7 +56,7 @@ public class MerchServiceImpl implements MerchService {
                     log.info("Merch updated: {}", merch);
                     return merchRepository.save(merch);
                 }
-        ).orElseThrow(() -> new IllegalStateException("Merch not found"));
+        ).orElseThrow(() -> new ResourceNotFoundException("Merch", "title", merchDto.getTitle()));
     }
 
     @Override
@@ -64,7 +67,7 @@ public class MerchServiceImpl implements MerchService {
                     log.info("Merch deleted: {}", merch);
                 },
                 () -> {
-                    throw new IllegalStateException("Merch not found");
+                    throw new ResourceNotFoundException("Merch", "id", id.toString());
                 }
         );
     }
@@ -78,7 +81,7 @@ public class MerchServiceImpl implements MerchService {
 
     private void orderMerchEvents(MerchOrder merchOrder) {
         Double merchPrice = merchRepository.findById(merchOrder.getMerchId()).map(Merch::getPrice).orElseThrow(
-                ()-> new IllegalStateException("Merch whit id "+merchOrder.getMerchId()+" does not exist")
+                ()-> new ResourceNotFoundException("Merch", "id", merchOrder.getMerchId().toString())
         );
         MerchOrderMsgDto merchOrderMsgDto = new MerchOrderMsgDto(
                 merchOrder.getOrderId(),
@@ -100,7 +103,7 @@ public class MerchServiceImpl implements MerchService {
                     return merchOrderRepository.save(order);
                 }
         ).orElseThrow(
-                ()-> new IllegalStateException("Merch order status changed does not exist")
+                ()-> new ResourceNotFoundException("Merch", "orderId", orderStatusMsgDto.orderId().toString())
         );
 
     }

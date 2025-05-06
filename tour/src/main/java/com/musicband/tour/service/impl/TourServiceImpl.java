@@ -3,6 +3,8 @@ package com.musicband.tour.service.impl;
 import com.musicband.tour.dto.TourDto;
 import com.musicband.tour.dto.TourMsgDto;
 import com.musicband.tour.entity.Tour;
+import com.musicband.tour.exceptions.ResourceNotFoundException;
+import com.musicband.tour.exceptions.TourAlreadyExistsException;
 import com.musicband.tour.mappers.TourMapper;
 import com.musicband.tour.repository.TourRepository;
 import com.musicband.tour.service.TourService;
@@ -26,7 +28,7 @@ public class TourServiceImpl implements TourService {
     @Override
     public void addTour(TourDto tourDto) {
         if(tourRepository.findByTitle(tourDto.getTitle()).isPresent()){
-            throw new IllegalStateException("Tour already exists");
+            throw new TourAlreadyExistsException("Tour already exists");
         }
 
         Tour savedTour = tourRepository.save(TourMapper.tourDtoToTour(tourDto, new Tour()));
@@ -50,7 +52,7 @@ public class TourServiceImpl implements TourService {
     @Override
     public void updateTour(TourDto tourDto) {
         Tour fetchedTour = tourRepository.findByTitle(tourDto.getTitle()).orElseThrow(
-                () -> new IllegalStateException("Tour not found")
+                () -> new ResourceNotFoundException("Tour", "Title", tourDto.getTitle())
         );
 
         Tour savedTour = tourRepository.save(TourMapper.tourDtoToTour(tourDto, fetchedTour));
@@ -74,7 +76,7 @@ public class TourServiceImpl implements TourService {
     @Override
     public void removeTour(String tourTitle) {
         Tour fetchedTour = tourRepository.findByTitle(tourTitle).orElseThrow(
-                () -> new IllegalStateException("Tour not found")
+                () -> new ResourceNotFoundException("Tour", "Title", tourTitle)
         );
         tourDeletedEvents(fetchedTour);
         tourRepository.delete(fetchedTour);
@@ -94,14 +96,14 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public List<TourDto> getTours() {
-        return tourRepository.findAll().stream().map(tour -> TourMapper.tourToTourDto(tour,new TourDto())).toList();
+    public List<Tour> getTours() {
+        return tourRepository.findAll();
     }
 
     @Override
     public TourDto getTour(String titleTour) {
         Tour fetchedTour = tourRepository.findByTitle(titleTour).orElseThrow(
-                () -> new IllegalStateException("Tour not found")
+                () -> new ResourceNotFoundException("Tour", "Title", titleTour)
         );
         return TourMapper.tourToTourDto(fetchedTour, new TourDto());
     }

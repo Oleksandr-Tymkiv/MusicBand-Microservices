@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: "authserver"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  datasource:
+    url: jdbc:postgresql://localhost:5437/authserverdb
+    username: postgres
+    password: root
+  sql:
+    init:
+      mode: always
+  jpa:
+    show-sql: true
+
+server:
+  port: 9030
+logging:
+  level:
+    com:
+      musicband:
+        authserver: DEBUG

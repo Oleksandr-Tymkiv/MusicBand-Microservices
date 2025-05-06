@@ -10,6 +10,7 @@ public class MerchMapper {
         merch.setPrice(merchDto.getPrice());
         merch.setCategory(merchDto.getCategory());
         merch.setDescription(merchDto.getDescription());
+        merch.setImage(merchDto.getImage());
         return merch;
     }
 
@@ -18,6 +19,7 @@ public class MerchMapper {
         merchDto.setPrice(merch.getPrice());
         merchDto.setCategory(merch.getCategory());
         merchDto.setDescription(merch.getDescription());
+        merchDto.setImage(merch.getImage());
         return merchDto;
     }
 

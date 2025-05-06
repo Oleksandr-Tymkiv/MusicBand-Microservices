@@ -3,6 +3,8 @@ package com.musicband.ticket.service.impl;
 import com.musicband.ticket.dto.*;
 import com.musicband.ticket.entity.Ticket;
 import com.musicband.ticket.entity.TicketOrder;
+import com.musicband.ticket.exceptions.ResourceNotFoundException;
+import com.musicband.ticket.exceptions.TicketAlreadyExistsException;
 import com.musicband.ticket.mapper.TicketMapper;
 import com.musicband.ticket.mapper.TicketOrderMapper;
 import com.musicband.ticket.repository.TicketOrderRepository;
@@ -31,7 +33,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public void addTicket(TicketDto ticketDto) {
         if(ticketRepository.findTicketByPlaceAndTourId(ticketDto.getPlace(), ticketDto.getTourId()).isPresent()){
-            throw new IllegalStateException("Ticket with place"+ ticketDto.getPlace() +" for tour with "+ ticketDto.getTourId()+" already exists ");
+            throw new TicketAlreadyExistsException("Ticket already exists");
         }
         Ticket savedTicket = ticketRepository.save(TicketMapper.ticketDtoToTicket(ticketDto,new Ticket()));
         newTicketsFotTour(savedTicket);
@@ -86,7 +88,7 @@ public class TicketServiceImpl implements TicketService {
 
     private void orderTickerEvents(TicketOrder ticketOrder) {
         Double tickerPrice = ticketRepository.findById(ticketOrder.getTicketId()).map(Ticket::getPrice).orElseThrow(
-                ()-> new IllegalStateException("Ticket whit id "+ticketOrder.getTicketId()+" does not exist")
+                ()-> new ResourceNotFoundException("Ticket order", "ticketId", ticketOrder.getTicketId().toString())
         );
         TicketOrderMsgDto ticketOrderMsgDto = new TicketOrderMsgDto(
                 ticketOrder.getOrderId(),
@@ -108,7 +110,7 @@ public class TicketServiceImpl implements TicketService {
                     return ticketOrderRepository.save(order);
                 }
         ).orElseThrow(
-                ()-> new IllegalStateException("Ticket order status changed does not exist")
+                ()-> new ResourceNotFoundException("Ticket order", "orderId", orderStatusMsgDto.orderId().toString())
         );
         ticketRepository.findById(ticketOrder.getTicketId()).map(
                 ticket ->{
@@ -117,7 +119,7 @@ public class TicketServiceImpl implements TicketService {
                     return ticketRepository.save(ticket);
                 }
         ).orElseThrow(
-                ()-> new IllegalStateException("Ticket does not exist")
+                ()-> new ResourceNotFoundException("Ticket order", "ticketId", ticketOrder.getTicketId().toString())
         );
     }
 

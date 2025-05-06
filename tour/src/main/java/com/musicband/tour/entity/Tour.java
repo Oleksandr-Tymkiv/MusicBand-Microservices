@@ -3,7 +3,7 @@ package com.musicband.tour.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table
@@ -29,7 +29,7 @@ public class Tour extends BaseEntity {
     @Column(name = "title")
     private String title;
     @Column(name = "tour_date")
-    private LocalDateTime tourDate;
+    private LocalDate tourDate;
     @Column(name = "country")
     private String country;
     @Column(name = "area")

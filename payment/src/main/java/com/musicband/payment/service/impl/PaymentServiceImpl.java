@@ -5,6 +5,8 @@ import com.musicband.payment.dto.OrderMsgDto;
 import com.musicband.payment.dto.OrderStatusMsgDto;
 import com.musicband.payment.dto.PaymentDto;
 import com.musicband.payment.entity.Payment;
+import com.musicband.payment.exceptions.PaymentAlreadyExistsException;
+import com.musicband.payment.exceptions.ResourceNotFoundException;
 import com.musicband.payment.mappers.PaymentMapper;
 import com.musicband.payment.repository.PaymentRepository;
 import com.musicband.payment.service.PaymentService;
@@ -30,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public void orderTicketCreate(OrderMsgDto ticketOrderMsgDto) {
         if(paymentRepository.findByOrderId(ticketOrderMsgDto.orderId()).isPresent()) {
-            throw new IllegalStateException("Ticket Order already exists");
+            throw new PaymentAlreadyExistsException("Payment already exists");
         }
         Payment savedPayment = PaymentMapper.ticketOrderDtoToPayment(ticketOrderMsgDto, new Payment());
         paymentRepository.save(savedPayment);
@@ -41,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public void orderMerchCreate(OrderMsgDto merchOrderMsgDto) {
         if(paymentRepository.findByOrderId(merchOrderMsgDto.orderId()).isPresent()) {
-            throw new IllegalStateException("Merch Order already exists");
+            throw new PaymentAlreadyExistsException("Merch Order already exists");
         }
         Payment savedPayment = PaymentMapper.merchOrderDtoToPayment(merchOrderMsgDto, new Payment());
         paymentRepository.save(savedPayment);
@@ -51,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public OrderDto getOrderInfo(UUID orderId) {
         return paymentRepository.findByOrderId(orderId).map(payment -> PaymentMapper.paymentToOrderDto(payment,new OrderDto())).orElseThrow(
-                ()-> new IllegalStateException("Order not found")
+                ()-> new ResourceNotFoundException("Order Payment", "orderId", orderId.toString())
         );
     }
 

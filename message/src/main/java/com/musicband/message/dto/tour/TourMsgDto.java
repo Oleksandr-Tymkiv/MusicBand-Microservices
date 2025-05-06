@@ -1,11 +1,11 @@
 package com.musicband.message.dto.tour;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record TourMsgDto(
         Long tourId,
         String title,
-        LocalDateTime tourDate,
+        LocalDate tourDate,
         String country,
         String area
 ) {

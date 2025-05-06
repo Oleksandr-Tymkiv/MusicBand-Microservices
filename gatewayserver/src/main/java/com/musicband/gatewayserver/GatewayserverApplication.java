@@ -43,6 +43,9 @@ public class GatewayserverApplication {
 				.route(p->p.path("/musicband/notification/**")
 						.filters(f->f.rewritePath("/musicband/notification/?(?<segment>.*)","/${segment}"))
 						.uri("lb://NOTIFICATION"))
+				.route(p->p.path("/musicband/authserver/**")
+						.filters(f->f.rewritePath("/musicband/authserver/?(?<segment>.*)","/${segment}"))
+						.uri("lb://AUTHSERVER"))
 				.build();
 	}
 }

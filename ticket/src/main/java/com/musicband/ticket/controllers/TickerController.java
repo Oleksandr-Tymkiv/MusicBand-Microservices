@@ -3,6 +3,7 @@ package com.musicband.ticket.controllers;
 import com.musicband.ticket.dto.TicketDto;
 import com.musicband.ticket.dto.TicketOrderDto;
 import com.musicband.ticket.service.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class TickerController {
     }
 
     @PostMapping("add-ticket")
-    public ResponseEntity<String> addTicket(@RequestBody TicketDto ticketDto) {
+    public ResponseEntity<String> addTicket(@Valid @RequestBody TicketDto ticketDto) {
         ticketService.addTicket(ticketDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -41,7 +42,7 @@ public class TickerController {
     }
 
     @PostMapping("order-ticket")
-    public ResponseEntity<String> orderTicket(@RequestBody TicketOrderDto ticketOrderDto) {
+    public ResponseEntity<String> orderTicket(@Valid @RequestBody TicketOrderDto ticketOrderDto) {
         ticketService.orderTicket(ticketOrderDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
