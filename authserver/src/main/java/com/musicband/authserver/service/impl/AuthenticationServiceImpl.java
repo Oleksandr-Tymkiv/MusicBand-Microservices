@@ -1,6 +1,7 @@
 package com.musicband.authserver.service.impl;
 
 import com.musicband.authserver.config.JwtService;
+import com.musicband.authserver.config.TokenBlacklistService;
 import com.musicband.authserver.dto.AuthenticationRequest;
 import com.musicband.authserver.dto.AuthenticationResponse;
 import com.musicband.authserver.dto.RegisterRequest;
@@ -24,6 +25,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     public AuthenticationResponse register(RegisterRequest registerRequest){
@@ -55,5 +57,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .builder()
                 .jwt(jwt)
                 .build();
+    }
+
+    @Override
+    public boolean logout(String authHeader) {
+        boolean isLoggedOut = false;
+        if(authHeader != null && authHeader.startsWith("Bearer ")){
+            String token = authHeader.substring(7);
+            tokenBlacklistService.blacklist(token);
+            isLoggedOut = true;
+        }
+        return isLoggedOut;
+    }
+
+    @Override
+    public boolean checkBlacklist(String jti) {
+        return tokenBlacklistService.isBlacklisted(jti);
     }
 }

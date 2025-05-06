@@ -8,4 +8,8 @@ public interface AuthenticationService {
     AuthenticationResponse register(RegisterRequest registerRequest);
 
     AuthenticationResponse authentication(AuthenticationRequest authenticationRequest);
+
+    boolean logout(String authHeader);
+
+    boolean checkBlacklist(String jti);
 }

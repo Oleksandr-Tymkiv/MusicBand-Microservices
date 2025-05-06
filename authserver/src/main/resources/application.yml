@@ -7,6 +7,12 @@ spring:
     url: jdbc:postgresql://localhost:5437/authserverdb
     username: postgres
     password: root
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
   sql:
     init:
       mode: always

@@ -21,6 +21,7 @@ import java.io.IOException;
 public class AuthFilterJwt extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

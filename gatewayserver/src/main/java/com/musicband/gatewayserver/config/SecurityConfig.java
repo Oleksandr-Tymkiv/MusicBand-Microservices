@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
@@ -29,13 +31,19 @@ public class SecurityConfig {
     @Value("${SECRET_KEY}")
     private String SECRET_KEY;
 
+    @Value("${authserver_url}")
+    private String authServerUrl;
+
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers(HttpMethod.GET).permitAll()
                         .pathMatchers("/musicband/authserver/**").permitAll()
-                        .anyExchange().authenticated()
+                        .anyExchange().hasAnyRole("USER","ADMIN")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> {
@@ -60,12 +68,36 @@ public class SecurityConfig {
         return new Converter<Jwt, Mono<AbstractAuthenticationToken>>() {
             @Override
             public Mono<AbstractAuthenticationToken> convert(Jwt jwt) {
-                String role = jwt.getClaim("role");
+                String jti = jwt.getClaim("jti").toString();
+                String role = jwt.getClaim("role").toString();
                 System.out.println(role);
+                System.out.println(jti);
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-                return Mono.just(new JwtAuthenticationToken(jwt, authorities));
+                return isTokenBlacklisted(jti).flatMap(blacklisted ->{
+                    if(blacklisted){
+                        return Mono.error(new RuntimeException("Token is blacklisted"));
+                    }
+                    return Mono.just(new JwtAuthenticationToken(jwt, authorities));
+                });
             }
         };
+    }
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
+    }
+
+    private Mono<Boolean> isTokenBlacklisted(String jti) {
+        return webClient()
+                .get()
+                .uri(authServerUrl, jti)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume(e -> {
+                    e.printStackTrace();
+                    return Mono.just(false);
+                });
     }
 }
 

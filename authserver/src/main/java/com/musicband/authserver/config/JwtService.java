@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -44,10 +45,12 @@ public class JwtService {
     }
 
     public String generatorJwt(Map<String, Object> extraClaims, UserDetails userDetails){
+        String jti = UUID.randomUUID().toString();
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .claim("role", userDetails.getAuthorities().stream().findFirst().get().getAuthority())
+                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority())
+                .claim("jti",jti)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+1000*24*60))
@@ -64,7 +67,7 @@ public class JwtService {
         return extractExpiration(jwt).before(new Date());
     }
 
-    private Date extractExpiration(String jwt) {
+    public Date extractExpiration(String jwt) {
         return extractClaim(jwt,Claims::getExpiration);
     }
 
@@ -73,9 +76,9 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractRoles(String jwt) {
+    public String extractJti(String jwt) {
         Claims claims = extractAllClaims(jwt);
-        return (String) claims.get("role");
+        return (String) claims.get("jti");
     }
 
 }
