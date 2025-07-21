@@ -30,7 +30,6 @@ public class Ticket extends BaseEntity {
     private String place;
     @Column(name = "is_available")
     private Boolean isAvailable;
-    @Column(name = "tour_id")
     private Long tourId;
 
 }

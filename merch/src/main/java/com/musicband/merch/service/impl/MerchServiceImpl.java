@@ -21,6 +21,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,6 @@ public class MerchServiceImpl implements MerchService {
 
     @Override
     public List<Merch> getAllMerch() {
-//        return merchRepository.findAll().stream().map(merch -> MerchMapper.merchToMerchDto(merch, new MerchDto())).toList();
         return merchRepository.findAll();
     }
 
@@ -73,10 +73,11 @@ public class MerchServiceImpl implements MerchService {
     }
 
     @Override
-    public void orderMerch(MerchOrderDto merchOrderDto) {
+    public UUID orderMerch(MerchOrderDto merchOrderDto) {
         MerchOrder merchOrder = merchOrderRepository.save(MerchOrderMapper.merchOrderDtoToMerchOrder(merchOrderDto, new MerchOrder()));
         orderMerchEvents(merchOrder);
         log.info("Saved merch order : {}",merchOrder);
+        return merchOrder.getOrderId();
     }
 
     private void orderMerchEvents(MerchOrder merchOrder) {

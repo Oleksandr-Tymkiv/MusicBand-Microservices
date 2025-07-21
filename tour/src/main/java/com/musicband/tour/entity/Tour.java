@@ -34,5 +34,4 @@ public class Tour extends BaseEntity {
     private String country;
     @Column(name = "area")
     private String area;
-
 }

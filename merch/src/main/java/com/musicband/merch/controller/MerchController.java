@@ -6,12 +6,14 @@ import com.musicband.merch.entity.Merch;
 import com.musicband.merch.service.MerchService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -44,8 +46,8 @@ public class MerchController {
     }
 
     @DeleteMapping("delete-merch/{id}")
-    public ResponseEntity<String> deleteMerch(@RequestParam("id")
-                                                  @NotEmpty(message = "Id cannot be a null or empty")
+    public ResponseEntity<String> deleteMerch(@PathVariable("id")
+                                                  @NotNull(message = "Id cannot be a null")
                                                   Long id ) {
         merchService.deleteMerch(id);
         return ResponseEntity
@@ -54,11 +56,10 @@ public class MerchController {
     }
 
     @PostMapping("order-merch")
-    public ResponseEntity<String> orderMerch(@Valid @RequestBody MerchOrderDto merchOrderDto) {
-        merchService.orderMerch(merchOrderDto);
+    public ResponseEntity<UUID> orderMerch(@Valid @RequestBody MerchOrderDto merchOrderDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("Order created successfully");
+                .body(merchService.orderMerch(merchOrderDto));
     }
 
 }

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS merch (
                                           title varchar(100) NOT NULL,
     price float NOT NULL,
     category varchar(20) NOT NULL,
-    description varchar(100) NOT NULL,
+    description varchar(300) NOT NULL,
     image varchar(100) NOT NULL,
     created_at date NOT NULL,
     created_by varchar(20) NOT NULL,
@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS merch_order (
     created_at date NOT NULL,
     created_by varchar(20) NOT NULL,
     updated_at date DEFAULT NULL,
-    updated_by varchar(20) DEFAULT NULL,
-    FOREIGN KEY (merch_id) REFERENCES merch(merch_id)
+    updated_by varchar(20) DEFAULT NULL
 );
 
 CREATE SEQUENCE IF NOT EXISTS seq_merch

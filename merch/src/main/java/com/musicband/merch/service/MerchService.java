@@ -6,6 +6,7 @@ import com.musicband.merch.dto.OrderStatusMsgDto;
 import com.musicband.merch.entity.Merch;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface MerchService {
 
@@ -17,7 +18,7 @@ public interface MerchService {
 
     void deleteMerch(Long id);
 
-    void orderMerch(MerchOrderDto merchOrderDto);
+    UUID orderMerch(MerchOrderDto merchOrderDto);
 
     void changeStatus(OrderStatusMsgDto orderStatusMsgDto);
 }

@@ -1,0 +1,343 @@
+services:
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD-SHELL","redis-cli ping | grep PONG" ]
+      timeout: 10s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-services
+
+  tourdb:
+    container_name: tourdb
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: tourdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  ticketdb:
+    container_name: ticketdb
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_DB: ticketdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  paymentdb:
+    container_name: paymentdb
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_DB: paymentdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  merchdb:
+    container_name: merchdb
+    ports:
+      - 5436:5432
+    environment:
+      POSTGRES_DB: merchdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  authserverdb:
+    container_name: authserverdb
+    ports:
+      - 5437:5432
+    environment:
+      POSTGRES_DB: authserverdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-config
+
+  kafka:
+    image: docker.io/bitnami/kafka:latest
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    extends:
+      file: common-config.yml
+      service: network-deploy-services
+
+
+
+  configserver:
+    image: "dedliparkurkiller123/configserver:v1"
+    container_name: configserver-ms
+    ports:
+      - "8071:8071"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-base-config
+    environment:
+      url_repo: https://github.com/Oleksandr-Tymkiv/config_server_repo.git
+      username_repo: Oleksandr-Tymkiv
+      password_repo: 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
+
+  eurekaserver:
+    image: "dedliparkurkiller123/eurekaserver:v1"
+    container_name: eurekaserver-ms
+    ports:
+      - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+      OTEL_SERVICE_NAME: "eurekaserver"
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+
+  tour:
+    image: "dedliparkurkiller123/tour:v1"
+    container_name: tour-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      tourdb:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "tour"
+      OTEL_SERVICE_NAME: "tour"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  ticket:
+    image: "dedliparkurkiller123/ticket:v1"
+    container_name: ticket-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      ticketdb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "ticket"
+      OTEL_SERVICE_NAME: "ticket"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  authserver:
+    image: "dedliparkurkiller123/authserver:v1"
+    container_name: authserver-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      authserverdb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "authserver"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+      OTEL_SERVICE_NAME: "authserver"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  merch:
+    image: "dedliparkurkiller123/merch:v1"
+    container_name: merch-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      merchdb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "merch"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+      OTEL_SERVICE_NAME: "merch"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  payment:
+    image: "dedliparkurkiller123/payment:v1"
+    container_name: payment-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      paymentdb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "payment"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+      OTEL_SERVICE_NAME: "payment"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  notification:
+    image: "dedliparkurkiller123/notification:v1"
+    container_name: notification-ms
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    environment:
+      SPRING_APPLICATION_NAME: "notification"
+      OTEL_SERVICE_NAME: "notification"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  gatewayserver:
+    image: "dedliparkurkiller123/gatewayserver:v1"
+    container_name: gatewayserver-ms
+    ports:
+      - "8072:8072"
+    depends_on:
+      tour:
+        condition: service_healthy
+      ticket:
+        condition: service_healthy
+      merch:
+        condition: service_healthy
+      notification:
+        condition: service_healthy
+      payment:
+        condition: service_healthy
+      authserver:
+        condition: service_healthy
+      message:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "gatewayserver"
+      OTEL_SERVICE_NAME: "gatewayserver"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  message:
+    image: "dedliparkurkiller123/message:v1"
+    container_name: message-ms
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "kafka:9092"
+    extends:
+      file: common-config.yml
+      service: network-deploy-services
+
+volumes:
+  kafka_data:
+    driver: local
+
+networks:
+  musicband:
+    driver: "bridge"

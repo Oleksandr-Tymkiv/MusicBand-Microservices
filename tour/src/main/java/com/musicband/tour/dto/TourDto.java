@@ -1,6 +1,7 @@
 package com.musicband.tour.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 public class TourDto {
     @NotEmpty(message = "Title cannot be a null or empty")
     private String title;
-    @NotEmpty(message = "Tour Date cannot be a null or empty")
+    @NotNull(message = "Tour Date cannot be null")
     private LocalDate tourDate;
     @NotEmpty(message = "Country cannot be a null or empty")
     private String country;

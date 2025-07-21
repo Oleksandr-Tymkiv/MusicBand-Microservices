@@ -2,6 +2,7 @@ package com.musicband.ticket.controllers;
 
 import com.musicband.ticket.dto.TicketDto;
 import com.musicband.ticket.dto.TicketOrderDto;
+import com.musicband.ticket.entity.Ticket;
 import com.musicband.ticket.service.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/api")
@@ -27,7 +29,7 @@ public class TickerController {
     }
 
     @GetMapping("find-all-available-tickets")
-    public ResponseEntity<List<TicketDto>> findAllAvailableTickets() {
+    public ResponseEntity<List<Ticket>> findAllAvailableTickets() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ticketService.getAvailableTickets());
@@ -42,10 +44,9 @@ public class TickerController {
     }
 
     @PostMapping("order-ticket")
-    public ResponseEntity<String> orderTicket(@Valid @RequestBody TicketOrderDto ticketOrderDto) {
-        ticketService.orderTicket(ticketOrderDto);
+    public ResponseEntity<UUID> orderTicket(@Valid @RequestBody TicketOrderDto ticketOrderDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("Order created successfully");
+                .body(ticketService.orderTicket(ticketOrderDto));
     }
 }

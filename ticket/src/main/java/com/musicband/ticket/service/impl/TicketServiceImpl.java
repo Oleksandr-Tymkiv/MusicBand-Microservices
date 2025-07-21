@@ -18,6 +18,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @Service
@@ -47,7 +48,7 @@ public class TicketServiceImpl implements TicketService {
                 ticket.getTourId()
         );
         log.info("New Ticket events: {}",ticketMsgDto);
-        boolean result = streamBridge.send("orderStatusPayment-out-0", ticketMsgDto);
+        boolean result = streamBridge.send("newTicketsEvents-out-0", ticketMsgDto);
         log.info("Result of adding: {}",result);
     }
 
@@ -70,8 +71,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public List<TicketDto> getAvailableTickets(){
-        return ticketRepository.findAllByIsAvailableIsTrue().stream().map(ticket -> TicketMapper.ticketToTicketDto(ticket, new TicketDto())).toList();
+    public List<Ticket> getAvailableTickets(){
+        return ticketRepository.findAllByIsAvailableIsTrue();
     }
 
     @Override
@@ -80,10 +81,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public void orderTicket(TicketOrderDto ticketOrderDto) {
+    public UUID orderTicket(TicketOrderDto ticketOrderDto) {
         TicketOrder ticketOrder = ticketOrderRepository.save(TicketOrderMapper.ticketOrderDtoToTicketOrder(ticketOrderDto, new TicketOrder()));
         orderTickerEvents(ticketOrder);
         log.info("Saved ticket order : {}",ticketOrder);
+        return  ticketOrder.getOrderId();
     }
 
     private void orderTickerEvents(TicketOrder ticketOrder) {
